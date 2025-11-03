@@ -59,8 +59,21 @@
       object-fit: contain;
       transition: opacity 0.8s ease;
     }
-    #mint, #download {
+    #mint {
       margin-top: 1.5rem;
+      margin-right: 1rem;
+      padding: 0.8rem 1.6rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #6c4efc;
+      color: white;
+      transition: background 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    #download {
       padding: 0.8rem 1.6rem;
       font-size: 1rem;
       border: none;
@@ -75,8 +88,39 @@
     #mint:hover, #download:hover {
       background: #5533e8;
     }
-    #mint {
-      margin-right: 1rem;
+    #download-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+    #download-progress {
+      width: 300px;
+      max-width: 90vw;
+      background: #e0e0e0;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      display: none;
+    }
+    #download-progress.active {
+      display: block;
+    }
+    #progress-bar {
+      height: 100%;
+      background: #6c4efc;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    #download-status {
+      font-size: 0.9rem;
+      color: #666;
+      min-height: 1.2rem;
+      display: none;
+    }
+    #download-status.active {
+      display: block;
     }
     p.note {
       max-width: 500px;
@@ -120,7 +164,13 @@
   </p>
 
   <a id="mint" href="https://farcaster.xyz/miniapps/DLMNg-iBux-P/wecastwarplets-49k-mint" target="_blank" rel="noopener noreferrer">Mint</a>
-  <button id="download">Download HD Version</button>
+  <div id="download-container">
+    <button id="download">Download HD Version</button>
+    <div id="download-progress">
+      <div id="progress-bar"></div>
+    </div>
+    <div id="download-status"></div>
+  </div>
 
   <script>
     // Detect mobile devices
@@ -217,15 +267,54 @@
     document.getElementById("download").addEventListener("click", async () => {
       const url = "https://ipfs.io/ipfs/QmVrFkv6NVQnCfWRVPPjgUDmm3AzZybdHMVKk5QVK3jHje/WeCastWarplet49k_HD.jpeg";
       const button = document.getElementById("download");
+      const progressBar = document.getElementById("progress-bar");
+      const progressContainer = document.getElementById("download-progress");
+      const statusText = document.getElementById("download-status");
       const originalText = button.textContent;
       
       try {
         button.textContent = "Downloading...";
         button.disabled = true;
+        progressContainer.classList.add("active");
+        statusText.classList.add("active");
+        statusText.textContent = "Starting download...";
         
         const response = await fetch(url);
-        const blob = await response.blob();
+        const contentLength = response.headers.get("content-length");
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        
+        if (!response.body) {
+          throw new Error("ReadableStream not supported");
+        }
+        
+        const reader = response.body.getReader();
+        const chunks = [];
+        let received = 0;
+        
+        while (true) {
+          const { done, value } = await reader.read();
+          
+          if (done) break;
+          
+          chunks.push(value);
+          received += value.length;
+          
+          if (total > 0) {
+            const percent = Math.round((received / total) * 100);
+            progressBar.style.width = percent + "%";
+            const receivedMB = (received / (1024 * 1024)).toFixed(1);
+            const totalMB = (total / (1024 * 1024)).toFixed(1);
+            statusText.textContent = `Downloading... ${percent}% (${receivedMB} MB / ${totalMB} MB)`;
+          } else {
+            const receivedMB = (received / (1024 * 1024)).toFixed(1);
+            statusText.textContent = `Downloading... ${receivedMB} MB`;
+          }
+        }
+        
+        const blob = new Blob(chunks);
         const blobUrl = URL.createObjectURL(blob);
+        
+        statusText.textContent = "Preparing download...";
         
         const a = document.createElement("a");
         a.href = blobUrl;
@@ -236,10 +325,21 @@
         
         URL.revokeObjectURL(blobUrl);
         
-        button.textContent = originalText;
-        button.disabled = false;
+        progressBar.style.width = "100%";
+        statusText.textContent = "Download complete!";
+        
+        setTimeout(() => {
+          progressContainer.classList.remove("active");
+          statusText.classList.remove("active");
+          progressBar.style.width = "0%";
+          button.textContent = originalText;
+          button.disabled = false;
+        }, 2000);
       } catch (error) {
         console.error("Download failed:", error);
+        progressContainer.classList.remove("active");
+        statusText.classList.remove("active");
+        progressBar.style.width = "0%";
         button.textContent = originalText;
         button.disabled = false;
         alert("Download failed. Please try again.");
