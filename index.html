@@ -214,14 +214,36 @@
     }
 
     // HD download
-    document.getElementById("download").addEventListener("click", () => {
+    document.getElementById("download").addEventListener("click", async () => {
       const url = "https://ipfs.io/ipfs/QmVrFkv6NVQnCfWRVPPjgUDmm3AzZybdHMVKk5QVK3jHje/WeCastWarplet49k_HD.jpeg";
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "WeCastWarplet49k_HD.jpeg";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
+      const button = document.getElementById("download");
+      const originalText = button.textContent;
+      
+      try {
+        button.textContent = "Downloading...";
+        button.disabled = true;
+        
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = "WeCastWarplet49k_HD.jpeg";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        
+        URL.revokeObjectURL(blobUrl);
+        
+        button.textContent = originalText;
+        button.disabled = false;
+      } catch (error) {
+        console.error("Download failed:", error);
+        button.textContent = originalText;
+        button.disabled = false;
+        alert("Download failed. Please try again.");
+      }
     });
   </script>
 </body>
