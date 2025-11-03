@@ -30,14 +30,11 @@
       overflow: hidden;
       position: relative;
     }
-    #lq {
-      position: absolute;
-      top: 0;
-      left: 0;
+    #placeholder {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      transition: opacity 1s ease;
+      transition: opacity 0.8s ease;
     }
     #download {
       margin-top: 1.5rem;
@@ -66,7 +63,7 @@
 
   <div id="viewer">
     <img
-      id="lq"
+      id="placeholder"
       src="https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_LQ.jpeg"
       alt="LQ preview"
     />
@@ -80,53 +77,36 @@
   <button id="download">Download HD Version</button>
 
   <script>
-    // Load the SD image into OpenSeadragon viewer
-    const viewer = OpenSeadragon({
-  id: "viewer",
-  prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
-  tileSources: {
-    type: "image",
-    url: "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg",
-    buildPyramid: false,
-    width: 32000,
-    height: 32000
-  },
-  showNavigationControl: true,
-  showNavigator: false,
-  animationTime: 1.2,
-  blendTime: 0.6,
-  minZoomLevel: 0.5,
-  maxZoomLevel: 10,
-  defaultZoomLevel: 1,
-  visibilityRatio: 1.0,
-});
+    // Once the SD image preloads, fade out LQ and show OSD viewer
+    const sdUrl = "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg";
+    const lq = document.getElementById("placeholder");
 
-// Fade out LQ image and fit to full view once loaded
-viewer.addHandler("open", () => {
-  viewer.viewport.goHome(true);  // ensures full image fits
-});
+    const sdImage = new Image();
+    sdImage.src = sdUrl;
+    sdImage.onload = () => {
+      const viewer = OpenSeadragon({
+        id: "viewer",
+        prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
+        tileSources: {
+          type: "image",
+          url: sdUrl,
+          buildPyramid: false,
+          width: 32000,
+          height: 32000
+        },
+        showNavigationControl: true,
+        showNavigator: false,
+        visibilityRatio: 1.0,
+        animationTime: 1.2,
+        blendTime: 0.6,
+      });
+      lq.style.opacity = 0;
+      setTimeout(() => lq.remove(), 800);
+    };
 
-viewer.addHandler("tile-loaded", () => {
-  const lq = document.getElementById("lq");
-  if (lq && !lq.classList.contains("faded")) {
-    lq.style.opacity = 0;
-    lq.classList.add("faded");
-  }
-});
-
-    // Fade out the LQ overlay when SD tiles start rendering
-    viewer.addHandler("tile-loaded", () => {
-      const lq = document.getElementById("lq");
-      if (lq && !lq.classList.contains("faded")) {
-        lq.style.opacity = 0;
-        lq.classList.add("faded");
-      }
-    });
-
-    // Download button for HD
+    // HD download
     document.getElementById("download").addEventListener("click", () => {
-      const url =
-        "https://ipfs.io/ipfs/QmVrFkv6NVQnCfWRVPPjgUDmm3AzZybdHMVKk5QVK3jHje/WeCastWarplet49k_HD.jpeg";
+      const url = "https://ipfs.io/ipfs/QmVrFkv6NVQnCfWRVPPjgUDmm3AzZybdHMVKk5QVK3jHje/WeCastWarplet49k_HD.jpeg";
       const a = document.createElement("a");
       a.href = url;
       a.download = "WeCastWarplet49k_HD.jpeg";
