@@ -97,6 +97,38 @@
     const lq = document.getElementById("placeholder");
     const loading = document.getElementById("loading");
 
+    let viewerInitialized = false;
+    function initializeViewer() {
+      if (viewerInitialized) return;
+      viewerInitialized = true;
+      
+      loading.classList.add("hidden");
+      try {
+        const viewer = OpenSeadragon({
+          id: "viewer",
+          prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
+          tileSources: {
+            type: "image",
+            url: sdUrl,
+            buildPyramid: false,
+            width: 32000,
+            height: 32000
+          },
+          showNavigationControl: true,
+          showNavigator: false,
+          visibilityRatio: 1.0,
+          animationTime: 1.2,
+          blendTime: 0.6,
+        });
+        lq.style.opacity = 0;
+        setTimeout(() => lq.remove(), 800);
+      } catch (e) {
+        // If OpenSeadragon fails (e.g., on mobile), just hide loading and show LQ
+        console.error("Failed to initialize viewer:", e);
+        loading.classList.add("hidden");
+      }
+    }
+
     // Update loading message when LQ image loads
     lq.onload = () => {
       loading.textContent = "Loading SD version...";
@@ -104,28 +136,29 @@
     };
 
     const sdImage = new Image();
-    sdImage.src = sdUrl;
-    sdImage.onload = () => {
+    sdImage.onload = initializeViewer;
+    sdImage.onerror = () => {
+      // If SD fails to load, just show LQ version
       loading.classList.add("hidden");
-      const viewer = OpenSeadragon({
-        id: "viewer",
-        prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
-        tileSources: {
-          type: "image",
-          url: sdUrl,
-          buildPyramid: false,
-          width: 32000,
-          height: 32000
-        },
-        showNavigationControl: true,
-        showNavigator: false,
-        visibilityRatio: 1.0,
-        animationTime: 1.2,
-        blendTime: 0.6,
-      });
-      lq.style.opacity = 0;
-      setTimeout(() => lq.remove(), 800);
     };
+    
+    sdImage.src = sdUrl;
+    
+    // Check if image is already cached/loaded (common on mobile)
+    // This handles cases where the image loads before onload handler fires
+    if (sdImage.complete && sdImage.naturalWidth > 0) {
+      initializeViewer();
+    }
+    
+    // Timeout fallback in case SD image never loads (e.g., slow mobile connection)
+    setTimeout(() => {
+      if (!viewerInitialized && sdImage.complete && sdImage.naturalWidth > 0) {
+        initializeViewer();
+      } else if (!viewerInitialized) {
+        // If it's been 30 seconds and still not loaded, show LQ version
+        loading.classList.add("hidden");
+      }
+    }, 30000);
 
     // HD download
     document.getElementById("download").addEventListener("click", () => {
