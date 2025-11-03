@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeCast Warplet 49k Viewer</title>
+  <script src="https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/openseadragon.min.js"></script>
+  <style>
+    body {
+      font-family: system-ui, sans-serif;
+      margin: 0;
+      background: #faf9f8;
+      color: #222;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 1rem;
+    }
+    h1 {
+      margin-top: 1rem;
+    }
+    #viewer {
+      width: 90vw;
+      height: 75vh;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      background: #ddd;
+      overflow: hidden;
+      position: relative;
+    }
+    #lq {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      transition: opacity 1s ease;
+    }
+    #download {
+      margin-top: 1.5rem;
+      padding: 0.8rem 1.6rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #6c4efc;
+      color: white;
+      transition: background 0.2s ease;
+    }
+    #download:hover {
+      background: #5533e8;
+    }
+    p.note {
+      max-width: 500px;
+      line-height: 1.5;
+      margin-top: 1.2rem;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <h1>WeCast Warplet 49 K</h1>
+
+  <div id="viewer">
+    <img
+      id="lq"
+      src="https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_LQ.jpeg"
+      alt="LQ preview"
+    />
+  </div>
+
+  <p class="note">
+    The SD version loads for smooth zooming and panning.<br />
+    The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.
+  </p>
+
+  <button id="download">Download HD Version</button>
+
+  <script>
+    // Load the SD image into OpenSeadragon viewer
+    const viewer = OpenSeadragon({
+      id: "viewer",
+      prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
+      tileSources: {
+        type: "image",
+        url: "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg",
+      },
+      showNavigationControl: true,
+      showNavigator: false,
+      animationTime: 1.2,
+      blendTime: 0.6,
+      minZoomLevel: 0.5,
+      maxZoomLevel: 10,
+      defaultZoomLevel: 1,
+      visibilityRatio: 1.0,
+    });
+
+    // Fade out the LQ overlay when SD tiles start rendering
+    viewer.addHandler("tile-loaded", () => {
+      const lq = document.getElementById("lq");
+      if (lq && !lq.classList.contains("faded")) {
+        lq.style.opacity = 0;
+        lq.classList.add("faded");
+      }
+    });
+
+    // Download button for HD
+    document.getElementById("download").addEventListener("click", () => {
+      const url =
+        "https://ipfs.io/ipfs/QmVrFkv6NVQnCfWRVPPjgUDmm3AzZybdHMVKk5QVK3jHje/WeCastWarplet49k_HD.jpeg";
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "WeCastWarplet49k_HD.jpeg";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    });
+  </script>
+</body>
+</html>
