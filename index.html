@@ -98,8 +98,7 @@
     // Update note text based on device
     const noteContent = document.getElementById("note-content");
     if (isMobile) {
-      const sdUrl = "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg";
-      noteContent.innerHTML = "The LQ version is displayed on mobile devices.<br /><a href='" + sdUrl + "' target='_blank' style='color: #6c4efc; text-decoration: underline;'>View SD version</a><br />The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.";
+      noteContent.innerHTML = "The LQ version is displayed on mobile devices. View on desktop for better resolution and smooth zooming and panning.<br />The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.";
     }
 
     // Once the SD image preloads, fade out LQ and show OSD viewer
