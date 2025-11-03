@@ -18,8 +18,31 @@
       min-height: 100vh;
       padding: 1rem;
     }
-    h1 {
+    .title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
       margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+    h1 {
+      margin: 0;
+    }
+    #mint-header {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #6c4efc;
+      color: white;
+      transition: background 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
+    }
+    #mint-header:hover {
+      background: #5533e8;
     }
     #viewer {
       width: 90vw;
@@ -36,7 +59,7 @@
       object-fit: contain;
       transition: opacity 0.8s ease;
     }
-    #download {
+    #mint, #download {
       margin-top: 1.5rem;
       padding: 0.8rem 1.6rem;
       font-size: 1rem;
@@ -46,9 +69,14 @@
       background: #6c4efc;
       color: white;
       transition: background 0.2s ease;
+      text-decoration: none;
+      display: inline-block;
     }
-    #download:hover {
+    #mint:hover, #download:hover {
       background: #5533e8;
+    }
+    #mint {
+      margin-right: 1rem;
     }
     p.note {
       max-width: 500px;
@@ -73,7 +101,10 @@
   </style>
 </head>
 <body>
-  <h1>WeCast Warplet 49 K</h1>
+  <div class="title-container">
+    <h1>WeCast Warplet 49 K</h1>
+    <a id="mint-header" href="https://mint-frame-we-cast-pro.vercel.app/" target="_blank" rel="noopener noreferrer">Mint</a>
+  </div>
 
   <div id="viewer">
     <div id="loading">Loading LQ version...</div>
@@ -88,6 +119,7 @@
     <span id="note-content">The SD version loads for smooth zooming and panning.<br />The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.</span>
   </p>
 
+  <a id="mint" href="https://mint-frame-we-cast-pro.vercel.app/" target="_blank" rel="noopener noreferrer">Mint</a>
   <button id="download">Download HD Version</button>
 
   <script>
