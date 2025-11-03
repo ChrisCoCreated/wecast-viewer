@@ -82,21 +82,37 @@
   <script>
     // Load the SD image into OpenSeadragon viewer
     const viewer = OpenSeadragon({
-      id: "viewer",
-      prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
-      tileSources: {
-        type: "image",
-        url: "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg",
-      },
-      showNavigationControl: true,
-      showNavigator: false,
-      animationTime: 1.2,
-      blendTime: 0.6,
-      minZoomLevel: 0.5,
-      maxZoomLevel: 10,
-      defaultZoomLevel: 1,
-      visibilityRatio: 1.0,
-    });
+  id: "viewer",
+  prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
+  tileSources: {
+    type: "image",
+    url: "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg",
+    buildPyramid: false,
+    width: 32000,
+    height: 32000
+  },
+  showNavigationControl: true,
+  showNavigator: false,
+  animationTime: 1.2,
+  blendTime: 0.6,
+  minZoomLevel: 0.5,
+  maxZoomLevel: 10,
+  defaultZoomLevel: 1,
+  visibilityRatio: 1.0,
+});
+
+// Fade out LQ image and fit to full view once loaded
+viewer.addHandler("open", () => {
+  viewer.viewport.goHome(true);  // ensures full image fits
+});
+
+viewer.addHandler("tile-loaded", () => {
+  const lq = document.getElementById("lq");
+  if (lq && !lq.classList.contains("faded")) {
+    lq.style.opacity = 0;
+    lq.classList.add("faded");
+  }
+});
 
     // Fade out the LQ overlay when SD tiles start rendering
     viewer.addHandler("tile-loaded", () => {
