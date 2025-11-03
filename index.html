@@ -84,9 +84,8 @@
     />
   </div>
 
-  <p class="note">
-    The SD version loads for smooth zooming and panning.<br />
-    The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.
+  <p class="note" id="note">
+    <span id="note-content">The SD version loads for smooth zooming and panning.<br />The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.</span>
   </p>
 
   <button id="download">Download HD Version</button>
@@ -95,6 +94,13 @@
     // Detect mobile devices
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
       || (window.innerWidth <= 768);
+
+    // Update note text based on device
+    const noteContent = document.getElementById("note-content");
+    if (isMobile) {
+      const sdUrl = "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg";
+      noteContent.innerHTML = "The LQ version is displayed on mobile devices.<br /><a href='" + sdUrl + "' target='_blank' style='color: #6c4efc; text-decoration: underline;'>View SD version</a><br />The full HD image (≈ 180 MB, 32 000 × 32 000 px) is too large for browsers — download it below.";
+    }
 
     // Once the SD image preloads, fade out LQ and show OSD viewer
     const sdUrl = "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg";
@@ -136,13 +142,18 @@
     // Update loading message when LQ image loads
     lq.onload = () => {
       if (isMobile) {
-        // On mobile, skip SD loading and just show LQ
+        // On mobile, LQ version loaded - hide loading message
         loading.classList.add("hidden");
       } else {
         loading.textContent = "Loading SD version...";
         loading.classList.remove("hidden");
       }
     };
+    
+    // Ensure mobile shows "Loading LQ version..." message
+    if (isMobile) {
+      loading.textContent = "Loading LQ version...";
+    }
 
     // Only attempt to load SD version on desktop
     if (!isMobile) {
