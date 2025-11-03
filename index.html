@@ -56,12 +56,27 @@
       margin-top: 1.2rem;
       color: #444;
     }
+    #loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      color: #666;
+      z-index: 10;
+      transition: opacity 0.5s ease;
+    }
+    #loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <h1>WeCast Warplet 49 K</h1>
 
   <div id="viewer">
+    <div id="loading">Loading LQ version...</div>
     <img
       id="placeholder"
       src="https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_LQ.jpeg"
@@ -80,10 +95,18 @@
     // Once the SD image preloads, fade out LQ and show OSD viewer
     const sdUrl = "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg";
     const lq = document.getElementById("placeholder");
+    const loading = document.getElementById("loading");
+
+    // Update loading message when LQ image loads
+    lq.onload = () => {
+      loading.textContent = "Loading SD version...";
+      loading.classList.remove("hidden");
+    };
 
     const sdImage = new Image();
     sdImage.src = sdUrl;
     sdImage.onload = () => {
+      loading.classList.add("hidden");
       const viewer = OpenSeadragon({
         id: "viewer",
         prefixUrl: "https://cdn.jsdelivr.net/npm/openseadragon@4.1/build/openseadragon/images/",
