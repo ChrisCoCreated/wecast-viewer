@@ -92,6 +92,10 @@
   <button id="download">Download HD Version</button>
 
   <script>
+    // Detect mobile devices
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+      || (window.innerWidth <= 768);
+
     // Once the SD image preloads, fade out LQ and show OSD viewer
     const sdUrl = "https://mint-frame-we-cast-pro.vercel.app/images/WeCastWarplet49k/WeCastWarplet49k_SD.jpeg";
     const lq = document.getElementById("placeholder");
@@ -131,34 +135,41 @@
 
     // Update loading message when LQ image loads
     lq.onload = () => {
-      loading.textContent = "Loading SD version...";
-      loading.classList.remove("hidden");
+      if (isMobile) {
+        // On mobile, skip SD loading and just show LQ
+        loading.classList.add("hidden");
+      } else {
+        loading.textContent = "Loading SD version...";
+        loading.classList.remove("hidden");
+      }
     };
 
-    const sdImage = new Image();
-    sdImage.onload = initializeViewer;
-    sdImage.onerror = () => {
-      // If SD fails to load, just show LQ version
-      loading.classList.add("hidden");
-    };
-    
-    sdImage.src = sdUrl;
-    
-    // Check if image is already cached/loaded (common on mobile)
-    // This handles cases where the image loads before onload handler fires
-    if (sdImage.complete && sdImage.naturalWidth > 0) {
-      initializeViewer();
-    }
-    
-    // Timeout fallback in case SD image never loads (e.g., slow mobile connection)
-    setTimeout(() => {
-      if (!viewerInitialized && sdImage.complete && sdImage.naturalWidth > 0) {
-        initializeViewer();
-      } else if (!viewerInitialized) {
-        // If it's been 30 seconds and still not loaded, show LQ version
+    // Only attempt to load SD version on desktop
+    if (!isMobile) {
+      const sdImage = new Image();
+      sdImage.onload = initializeViewer;
+      sdImage.onerror = () => {
+        // If SD fails to load, just show LQ version
         loading.classList.add("hidden");
+      };
+      
+      sdImage.src = sdUrl;
+      
+      // Check if image is already cached/loaded
+      if (sdImage.complete && sdImage.naturalWidth > 0) {
+        initializeViewer();
       }
-    }, 30000);
+      
+      // Timeout fallback in case SD image never loads
+      setTimeout(() => {
+        if (!viewerInitialized && sdImage.complete && sdImage.naturalWidth > 0) {
+          initializeViewer();
+        } else if (!viewerInitialized) {
+          // If it's been 30 seconds and still not loaded, show LQ version
+          loading.classList.add("hidden");
+        }
+      }, 30000);
+    }
 
     // HD download
     document.getElementById("download").addEventListener("click", () => {
